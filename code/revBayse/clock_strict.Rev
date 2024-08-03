@@ -1,0 +1,3 @@
+#We don’t know the rate of evolution, so we’ll use an exponential prior.
+
+branch_rates ~ dnExponential(10.0)

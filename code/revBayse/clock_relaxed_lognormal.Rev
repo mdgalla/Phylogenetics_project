@@ -1,0 +1,20 @@
+# prior on the mean of the lognormal distribution
+branch_rates_mean ~ dnExponential(10.0)
+# move on this parameter
+moves.append( mvScale(branch_rates_mean, lambda = 0.5, tune = true, weight = 3.0) )
+
+branch_rates_sd ~ dnExponential(2) #standard deviation 
+# move on this parameter
+moves.append( mvScale(branch_rates_sd, lambda = 0.5, tune = true, weight = 3.0) )
+
+# transform the rate into a log of the branch rate mean
+ln_branch_rates_mean := ln( branch_rates_mean )
+
+# create a vector of rates for each branch
+for(i in 1:num_branches){
+    branch_rates[i] ~ dnLognormal(ln_branch_rates_mean, sd = branch_rates_sd)
+    moves.append( mvScale(branch_rates[i], lambda = 0.5, tune = true, weight = 1.0) )
+}
+
+# add moves on the branch rates vector 
+moves.append( mvVectorScale(branch_rates, lambda = 0.5, tune = true, weight = 4.0) )

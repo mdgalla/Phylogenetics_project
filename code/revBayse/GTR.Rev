@@ -1,0 +1,16 @@
+alpha1 <- v(1,1,1,1,1,1) # 6 for rates
+alpha2 <- v(1,1,1,1) # 4 for state frequencies
+er ~ dnDirichlet(alpha1)
+freq ~ dnDirichlet(alpha2)
+
+moves.append( mvBetaSimplex(er, weight=2) )
+moves.append( mvDirichletSimplex(er, weight=1) )
+
+moves.append( mvBetaSimplex(freq, weight=2) )
+moves.append( mvDirichletSimplex(freq, weight=1) )
+
+Q := fnGTR(er, freq)
+Q
+
+seq ~ dnPhyloCTMC(tree = tree, Q = Q, type = "DNA", branchRates = branch_rates)
+seq.clamp(data)

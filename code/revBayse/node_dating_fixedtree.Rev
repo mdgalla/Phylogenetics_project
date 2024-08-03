@@ -1,0 +1,33 @@
+#using a birth-death processes model, using living species. So we only need spec and ext rates 
+
+speciation_rate ~ dnExponential(10) #used an exponential or fix it 
+extinction_rate ~ dnExponential(10)
+
+#specify moves of these parameters 
+moves.append( mvScale(speciation_rate, lambda = 0.5, tune = true, weight = 3.0) )
+moves.append( mvScale(extinction_rate, lambda = 0.5, tune = true, weight = 3.0) )
+
+#third parameter, probability of extant species sampling 
+rho <- 1.0
+
+#we will use a uniform prior because we do not know more info about the age between these 
+
+# min and max bounds #normal distribution #mean is 
+root_min <- 0
+
+# normal prior
+root_age ~ dnNormal(29, 3, 0, 500) #mean, sd, min
+
+# assign a move to sample the root age
+moves.append( mvScale(root_age, lambda = 1, tune = true, weight = 5.0) )
+
+#Now that we’ve specified the parameters of the birth-death model and the root age prior, we can use 
+#these to define the prior distribution on the tree topology and divergence times.
+tree ~ dnBDP(lambda = speciation_rate, mu = extinction_rate, rho = rho, rootAge = root_age, taxa = taxa)
+tree.setValue(T)
+
+# moves to search tree space
+#moves.append( mvNarrow(tree, weight = num_taxa) )
+#moves.append( mvFNPR(tree, weight = num_taxa/4) )
+moves.append( mvNodeTimeSlideUniform(tree, weight = num_taxa) )
+moves.append( mvSubtreeScale(tree, weight = num_taxa/5.0) )
